@@ -198,7 +198,7 @@ class FilesystemRepository extends WritableArrayRepository
      *
      * @internal
      */
-    public static function safelyLoadInstalledVersions(string $path): bool
+    public static function _safelyLoadInstalledVersions(string $path): bool
     {
         $installedVersionsData = @file_get_contents($path);
         $pattern = <<<'REGEX'
@@ -231,7 +231,7 @@ REGEX;
 
         foreach ($array as $key => $value) {
             $lines .= str_repeat('    ', $level);
-            $lines .= is_int($key) ? $key . ' => ' : var_export($key, true) . ' => ';
+            $lines .= is_int($key) ? $key . ' => ' : '\'' . $key . '\' => ';
 
             if (is_array($value)) {
                 if (!empty($value)) {
@@ -245,15 +245,17 @@ REGEX;
                 } else {
                     $lines .= "__DIR__ . " . var_export('/' . $value, true) . ",\n";
                 }
-            } elseif (is_string($value)) {
+            // } elseif (is_string($value)) {
+            } else{
                 $lines .= var_export($value, true) . ",\n";
-            } elseif (is_bool($value)) {
-                $lines .= ($value ? 'true' : 'false') . ",\n";
-            } elseif (is_null($value)) {
-                $lines .= "null,\n";
-            } else {
-                throw new \UnexpectedValueException('Unexpected type '.gettype($value));
             }
+            // } elseif (is_bool($value)) {
+            //     $lines .= ($value ? 'true' : 'false') . ",\n";
+            // } elseif (is_null($value)) {
+            //     $lines .= "null,\n";
+            // } else {
+            //     throw new \UnexpectedValueException('Unexpected type '.gettype($value));
+            // }
         }
 
         $lines .= str_repeat('    ', $level - 1) . ')' . ($level - 1 === 0 ? '' : ",\n");
